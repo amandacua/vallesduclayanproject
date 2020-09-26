@@ -45,33 +45,73 @@
 // addToList / addToIncome/ addToExpense => append the list : description and value
 // removeFromList => remove item
 
+// IF newitem vartype = 20334
+        // turn to toInteger
+        // turn to currency to output
+        // ELSE  if remove item vartype = $2,000.00
+        //     turn to integer 
+
+    
 var budgetApp = function(type,description,value) {
     this.value = parseFloat(value);
     var income = document.getElementById('income-amount');
     var expenses = document.getElementById('expenses-amount');
     var total = document.getElementById('total-amount');
     
+    
+    budgetApp.prototype.appendApp = function(cb) {
+        //converts all to integer
+        income.innerHTML = this.toInteger(income.innerHTML)
+        expenses.innerHTML = this.toInteger(expenses.innerHTML)
+        total.innerHTML = this.toInteger(total.innerHTML)
+        //checks function required
+        if (cb === "getTotalIncome") {
+            console.log('get income')
+            this.getTotalIncome()
+
+        } else if (cb === "removeFromList"){
+            console.log('remove')
+            this.removeFromList()
+        }
+        //converts all to integer
+        income.innerHTML = this.toCurrency(income.innerHTML)
+        expenses.innerHTML = this.toCurrency(expenses.innerHTML)
+        total.innerHTML = this.toCurrency(total.innerHTML)
+    }
+
+    budgetApp.prototype.toCurrency = function(x) {
+       var num =  new Intl.NumberFormat('en-US', {
+            style:'currency',
+            currency:'USD'
+          }); 
+          return num.format(x)
+    }
+
+    budgetApp.prototype.toInteger = function(num) {
+        return parseFloat((num).replace(/[^0-9.-]+/g,""));
+    }
 
     // -------------------------------------------------------------------------------------
     //                              GET TOTAL INCOME FUNCTION        
     // -------------------------------------------------------------------------------------
 
     budgetApp.prototype.getTotalIncome = function() {
-        let newElement =  `<li> <p>${description}</p> <p>${value}</p> <div class = "delete-button">⌫</div> </li>`     //newElement Format
+        let newElement =  `<li> <p>${description}</p> <p>${this.toCurrency(value)}</p> <div class = "delete-button">⌫</div> </li>`     //newElement Format
         let status = ''
 
         if (type === "+") {
-          income.innerHTML =  parseFloat(income.innerHTML) + this.value;        //TAKE TOTAL EXPENSES
-          status = 'income';
+          income.innerHTML = parseFloat(income.innerHTML) + this.value;        //TAKE TOTAL EXPENSES
+          status = `income`;
 
         } else if (type === "-") {
           expenses.innerHTML = parseFloat(expenses.innerHTML) + this.value;     //TAKES IN TOTAL EXPENSES
-          status = 'expenses';
+          status = `expenses`;
         }
 
         document.getElementById(`${status}-list`).insertAdjacentHTML('beforeend', newElement ); //ADD ELEMENT TO END
-        total.innerHTML = (income.innerHTML - expenses.innerHTML);                               // GET TOTAL MONEY
+        total.innerHTML = income.innerHTML - expenses.innerHTML;                               // GET TOTAL MONEY
       }
+
     // -------------------------------------------------------------------------------------
     //                              REMOVE FROM LIST FUNCTION       
     // -------------------------------------------------------------------------------------
@@ -92,7 +132,9 @@ var budgetApp = function(type,description,value) {
     }
     
 }
-
+    // -------------------------------------------------------------------------------------
+    //                              MAIN
+    // -------------------------------------------------------------------------------------
 let budgetInput = null; 
 
 document.addEventListener('click', e => {
@@ -105,14 +147,14 @@ document.addEventListener('click', e => {
 
     if (button === 'delete-button'){
         e.target.parentElement.id = 'delete';
-        budgetInput.removeFromList();
+        budgetInput.appendApp('removeFromList')
     } else if (button === 'submit-button'){
 
         if (value === '' || description ===''){                         // CHECKS WHETHER IT'S EMPTY
             alert("Please enter a value");
         } else {
             budgetInput = new budgetApp(type,description,value);
-            budgetInput.getTotalIncome();        
+            budgetInput.appendApp('getTotalIncome')
         }
     }
 }
